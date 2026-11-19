@@ -17,6 +17,10 @@
 # Output: target/release/signal_bridge.{dll,so,dylib}
 # =========================================================================
 
+# Standalone workspace root: stops cargo from walking up into an enclosing
+# workspace (e.g. when the repo is checked out inside another checkout).
+[workspace]
+
 [package]
 name = "signal-bridge"
 version = "0.1.0"

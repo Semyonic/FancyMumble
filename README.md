@@ -36,7 +36,7 @@ Fancy Mumble is a next-generation desktop client for Mumble that combines the re
 - **Modern glassmorphic UI** - Responsive design for desktop and Android
 - **Flexible voice controls** - Push-to-talk, voice activity detection, per-channel listening
 - **Secure** - TLS encryption, self-signed certificates, no telemetry
-- **Cross-platform** - Windows, Linux, and Android support
+- **Cross-platform** - Windows, Linux, macOS, and Android support
 
 ---
 
@@ -99,6 +99,12 @@ sudo apt-get install -y \
   libjavascriptcoregtk-4.1-dev
 ```
 
+**macOS:**
+```bash
+xcode-select --install   # Command Line Tools (clang, codesign)
+brew install protobuf cmake
+```
+
 **Android:**
 See [ANDROID_DEV.md](ANDROID_DEV.md) for complete Android development setup instructions.
 
@@ -129,7 +135,7 @@ The app will launch with hot-reloading enabled for both Rust and TypeScript chan
 
 ## Building
 
-### Desktop (Windows/Linux)
+### Desktop (Windows/Linux/macOS)
 
 ```bash
 cd crates/mumble-tauri
@@ -139,6 +145,12 @@ cargo tauri build
 Production installers will be generated in `target/release/bundle/`:
 - **Windows:** `.exe` installer, `.msi` package
 - **Linux:** `.deb`, `.AppImage`, `.rpm`
+- **macOS:** `macos/FancyMumble.app`, `dmg/FancyMumble_<version>_<arch>.dmg`
+
+macOS settings live in `crates/mumble-tauri/tauri.macos.conf.json` (merged
+automatically on macOS). The bundle is ad-hoc signed, not notarized, so it
+runs on the machine that built it; on another Mac, clear the quarantine flag
+first: `xattr -dr com.apple.quarantine /Applications/FancyMumble.app`.
 
 ### Android
 

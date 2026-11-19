@@ -22,7 +22,8 @@ use super::PchatState;
 ///
 /// Searches for the platform-specific library name in several locations:
 /// 1. Next to the executable (Windows installers, `AppImage`, dev mode)
-/// 2. `../lib/fancy-mumble/` relative to the exe (Linux deb packages)
+/// 2. `../lib/fancy-mumble/` relative to the exe (Linux deb packages),
+///    or `../Resources/signal-bridge/` (macOS `.app` bundles)
 /// 3. Extra search directory (e.g. Android `nativeLibraryDir`)
 /// 4. On Android, bare filename as fallback (`dlopen` resolves it)
 ///
@@ -55,6 +56,13 @@ pub(crate) fn load_signal_bridge(
                 dir.join("../lib/fancy-mumble/signal-bridge")
                     .join(lib_name),
             );
+            // macOS .app bundle: exe lives in Contents/MacOS/, bundled
+            // resources in Contents/Resources/.
+            if cfg!(target_os = "macos") {
+                candidates.push(
+                    dir.join("../Resources/signal-bridge").join(lib_name),
+                );
+            }
         }
     }
 
