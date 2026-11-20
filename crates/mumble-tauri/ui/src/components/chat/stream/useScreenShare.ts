@@ -30,6 +30,7 @@ import {
   storeLocalThumbnail,
 } from "../stream/useStreamPreview";
 import { clearAllStrokesInChannel, clearStrokesFromSender } from "../drawing/DrawingOverlay";
+import { prepareSystemAudioContext, startSystemAudio, type SystemAudioCapture } from "./systemAudio";
 
 // This module holds singleton WebRTC state (broadcasterPc, viewerPcs, etc.).
 // Vite HMR would otherwise hot-swap the module while leaving stale closures
@@ -92,6 +93,9 @@ function showWebRtcError(message: string): void {
 
 /** Active local media stream from getDisplayMedia. */
 let localStream: MediaStream | null = null;
+
+/** Native system-audio capture feeding `localStream` (macOS only). */
+let systemAudio: SystemAudioCapture | null = null;
 
 /** Single peer connection from broadcaster to the server SFU. */
 let broadcasterPc: RTCPeerConnection | null = null;
@@ -295,6 +299,10 @@ function stopBroadcasting(): void {
       drawingActiveChannels: drawing,
     };
   });
+  if (systemAudio) {
+    systemAudio.stop();
+    systemAudio = null;
+  }
   if (localStream) {
     for (const track of localStream.getTracks()) track.stop();
     localStream = null;
@@ -691,11 +699,27 @@ export function useScreenShare(): ScreenShareHook {
       showWebRtcError("This server does not have a WebRTC relay configured. Screen sharing is unlikely to work.");
     }
 
+    // Created before the first await so it still counts as a user gesture.
+    const audioCtx = prepareSystemAudioContext();
     try {
       const mediaStream = await navigator.mediaDevices.getDisplayMedia({
         video: true,
         audio: true,
       });
+
+      // WebKit (macOS) never captures audio for a screen share; fall back
+      // to native system-audio capture so viewers still hear the share.
+      if (audioCtx && mediaStream.getAudioTracks().length === 0) {
+        try {
+          systemAudio = await startSystemAudio(audioCtx);
+          mediaStream.addTrack(systemAudio.track);
+        } catch (e) {
+          console.warn("[screenshare] system audio unavailable, sharing video only:", e);
+          audioCtx.close().catch(() => {});
+        }
+      } else {
+        audioCtx?.close().catch(() => {});
+      }
 
       localStream = mediaStream;
       setStream(mediaStream);
@@ -742,6 +766,7 @@ export function useScreenShare(): ScreenShareHook {
     } catch (e) {
       // User cancelled the screen picker dialog - not an error.
       console.warn("[screenshare] getDisplayMedia failed or cancelled:", e);
+      if (!systemAudio) audioCtx?.close().catch(() => {});
     }
   }, [ownSession]);
 

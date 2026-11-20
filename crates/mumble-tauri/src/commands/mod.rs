@@ -27,4 +27,5 @@ pub(crate) mod realtime;
 pub(crate) mod server;
 pub(crate) mod servers;
 pub(crate) mod system;
+pub(crate) mod system_audio;
 pub(crate) mod window;

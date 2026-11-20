@@ -734,6 +734,8 @@ macro_rules! all_command_handlers {
             commands::dm::select_dm_user,
             commands::dm::get_dm_unread_counts,
             commands::dm::mark_dm_read,
+            commands::system_audio::start_system_audio_capture,
+            commands::system_audio::stop_system_audio_capture,
             commands::system::reset_app_data,
             commands::system::set_log_level,
             commands::system::set_log_to_file,

@@ -16,6 +16,7 @@ mod windows;
 pub(crate) mod android;
 #[cfg(not(target_os = "android"))]
 pub(crate) mod desktop;
+pub(crate) mod system_audio;
 pub(crate) mod window;
 
 /// Lifecycle hooks invoked at fixed points in the application startup sequence.

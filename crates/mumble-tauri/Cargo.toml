@@ -107,6 +107,15 @@ windows-core = "0.61"
 [target.'cfg(target_os = "macos")'.dependencies]
 objc2 = "0.5"
 objc2-foundation = { version = "0.2", features = ["NSGeometry"] }
+# System-audio capture for screen sharing via a Core Audio process tap
+# (see crates/mumble-tauri/src/platform/system_audio/macos.rs).  These
+# crates are already in the tree through cpal; the objc2 0.6 family is
+# renamed so it can coexist with the 0.5 crates used above.
+objc2-core-audio = { version = "0.3", default-features = false, features = ["std", "AudioHardware", "objc2", "objc2-foundation", "objc2-core-audio-types"] }
+objc2-core-audio-types = { version = "0.3", default-features = false, features = ["std"] }
+objc2-core-foundation = { version = "0.3", default-features = false, features = ["std", "CFDictionary"] }
+objc2-06 = { package = "objc2", version = "0.6" }
+objc2-foundation-03 = { package = "objc2-foundation", version = "0.3", default-features = false, features = ["std", "NSArray", "NSDictionary", "NSObject", "NSString", "NSUUID", "NSValue"] }
 
 # Linux-only: gtk_window_set_geometry_hints for native aspect-ratio
 # constraints (see crates/mumble-tauri/src/platform/window/linux.rs).

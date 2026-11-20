@@ -4,5 +4,7 @@
 <plist version="1.0">
 <dict>
   <key>NSMicrophoneUsageDescription</key>
-  <string>Fancy Mumble needs microphone access to transmit your voice.</string></dict>
+  <string>Fancy Mumble needs microphone access to transmit your voice.</string>
+  <key>NSAudioCaptureUsageDescription</key>
+  <string>Fancy Mumble captures your Mac's sound to include it in your screen share.</string></dict>
 </plist>
