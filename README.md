@@ -35,6 +35,7 @@ Fancy Mumble is a next-generation desktop client for Mumble that combines the re
 - **Profile customization** - Custom avatar frames, banners, nameplates, and WYSIWYG bio editor
 - **Modern glassmorphic UI** - Responsive design for desktop and Android
 - **Flexible voice controls** - Push-to-talk, voice activity detection, per-channel listening
+- **Screen sharing** - Server-relayed WebRTC screen shares with system audio (on macOS too, via a native Core Audio capture)
 - **Secure** - TLS encryption, self-signed certificates, no telemetry
 - **Cross-platform** - Windows, Linux, macOS, and Android support
 
@@ -147,10 +148,27 @@ Production installers will be generated in `target/release/bundle/`:
 - **Linux:** `.deb`, `.AppImage`, `.rpm`
 - **macOS:** `macos/FancyMumble.app`, `dmg/FancyMumble_<version>_<arch>.dmg`
 
-macOS settings live in `crates/mumble-tauri/tauri.macos.conf.json` (merged
-automatically on macOS). The bundle is ad-hoc signed, not notarized, so it
-runs on the machine that built it; on another Mac, clear the quarantine flag
-first: `xattr -dr com.apple.quarantine /Applications/FancyMumble.app`.
+#### macOS notes
+
+- **Config:** macOS settings live in `crates/mumble-tauri/tauri.macos.conf.json`
+  (merged automatically on macOS) plus `Info.plist` and `Entitlements.plist`
+  next to it.
+- **Install:** copy the bundle to `/Applications` so Spotlight, Raycast and
+  Launchpad find it:
+  `ditto target/release/bundle/macos/FancyMumble.app /Applications/FancyMumble.app`
+- **Signing:** the bundle is ad-hoc signed, not notarized, so it runs on the
+  machine that built it; on another Mac, clear the quarantine flag first:
+  `xattr -dr com.apple.quarantine /Applications/FancyMumble.app`.
+  macOS may ask for the microphone and audio-capture permissions again after
+  each rebuild, because the ad-hoc signature changes.
+- **Screen-share audio:** WebKit cannot capture audio for a screen share, so
+  the app captures the Mac's output itself with a Core Audio process tap
+  (macOS 14.2+; older versions share video only). The first share asks for
+  the *System Audio Recording* permission. The app's own playback (Mumble
+  voices) is excluded from the capture.
+- **`failed to run xattr` while bundling:** a Python `xattr` package earlier
+  in `PATH` shadows Apple's `/usr/bin/xattr`. Build with
+  `PATH=/usr/bin:$PATH cargo tauri build`.
 
 ### Android
 
